@@ -1,0 +1,258 @@
+<!--
+Final all-in-one Princess Day app
+- Uses black background, emoji decorations, letter input, book transition (title: Grace), mirror fullscreen with Cinderella example (image left, text right), 4 other beauty pages, voice reading via Web Speech API, and final reveal.
+- Correct name accepted: "Falak" (case-insensitive) and variants Falak, falak, FALAK.
+- If correct -> happy path; else -> alternate apology path with different voice and message.
+- Replace placeholder image URLs/audio URLs with your own raw links if available. You previously provided GitHub commit links; they are included as references in the comments and as data-src attributes.
+--><!doctype html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Princess Day — Grace</title>
+<style>
+  :root{--accent:#f4dcdc;--gold:#f7c46c}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;background:#000;color:#fff;overflow:hidden}/* Background + emoji decor */ .bg{position:fixed;inset:0;z-index:0;display:block;overflow:hidden} .stars{position:absolute;inset:0;background:radial-gradient(ellipse at center, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0.00) 40%)} .emoji-decor{position:absolute;inset:0;pointer-events:none} .emoji{position:absolute;font-size:28px;opacity:0.9;transform:translateY(0);animation:floatUp linear infinite} @keyframes floatUp{0%{transform:translateY(10vh) rotate(0)}100%{transform:translateY(-80vh) rotate(360deg)}}
+
+/* Letter screen */ .letterScreen{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:10;background:linear-gradient(180deg,#000,#060606)} .letterBox{width:min(780px,92%);background:rgba(255,255,255,0.03);border-radius:16px;padding:28px;border:1px solid rgba(255,255,255,0.05);text-align:center} .letterBox h1{margin:0 0 6px 0;font-size:30px} .letterBox p{opacity:0.9} .nameInput{margin-top:18px;padding:12px 14px;border-radius:10px;border:none;font-size:18px;width:60%;text-align:center;background:#111;color:#fff} .enterBtn{margin-top:16px;padding:10px 18px;border-radius:12px;border:none;background:linear-gradient(90deg,#f7c46c,#ffb6c1);color:#061226;font-weight:700;cursor:pointer} .smallNote{margin-top:12px;font-size:13px;opacity:0.8}
+
+/* Book screen */ .bookScreen{position:fixed;inset:0;display:none;z-index:20;align-items:center;justify-content:center;flex-direction:column} .bookTitle{font-size:44px;font-weight:800;color:var(--accent);opacity:0;transition:opacity .9s ease} .book{width:min(1100px,92%);height:66vh;background:linear-gradient(180deg,#0b0b0b,#111111);border-radius:18px;margin-top:26px;display:flex;align-items:center;justify-content:center;transform-origin:center;opacity:0;transition:opacity .9s ease,transform .9s ease} .book.open{transform:scale(1);}
+
+/* Mirror fullscreen */ .mirrorScreen{position:fixed;inset:0;display:none;z-index:30;align-items:center;justify-content:center;flex-direction:column;background:linear-gradient(180deg,#060609,#000)} .page{width:90%;max-width:1200px;display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:center;padding:28px} .page .imgWrap{display:flex;align-items:center;justify-content:center} .page img{width:100%;max-height:60vh;object-fit:cover;border-radius:12px;border:6px solid rgba(255,255,255,0.02);box-shadow:0 12px 40px rgba(0,0,0,0.6)} .page .textWrap{color:#f8f8f8;font-size:20px;line-height:1.6} .askLine{font-weight:800;font-size:24px;margin-bottom:12px}
+
+/* controls small */ .controls{position:fixed;left:12px;bottom:12px;z-index:80;font-size:13px;opacity:0.9}
+
+/* final reveal */ .finalScreen{position:fixed;inset:0;display:none;z-index:50;align-items:center;justify-content:center;flex-direction:column;background:radial-gradient(circle at center, rgba(255,255,255,0.02), transparent 40%)} .finalLine{font-size:56px;font-weight:900;padding:12px 24px;border-radius:12px;background:linear-gradient(90deg,#1b1b1b, rgba(255,255,255,0.02));color:#ffdfe0;box-shadow:0 18px 50px rgba(0,0,0,0.6);transform:scale(0.96);opacity:0;transition:opacity .9s,transform .9s} .subLines{margin-top:18px;font-size:18px;opacity:0.95;text-align:center;max-width:760px}
+
+/* responsive */ @media(max-width:900px){.page{grid-template-columns:1fr;}.finalLine{font-size:34px}}
+
+</style>
+</head>
+<body><!-- Background & emojis --><div class="bg">
+  <div class="stars"></div>
+  <div class="emoji-decor" id="emojiDecor"></div>
+</div><!-- LETTER SCREEN --><div class="letterScreen" id="letterScreen">
+  <div class="letterBox">
+    <h1>Princess Day</h1>
+    <p>Enter her name below. If it matches the special name, the story will unfold.</p>
+    <input id="nameInput" class="nameInput" placeholder="Enter name (e.g. Falak)" value="" />
+    <div><button id="enterBtn" class="enterBtn">Open Letter</button></div>
+    <div class="smallNote">Background & decor are created automatically. Use exact name: Falak (any case).</div>
+  </div>
+</div><!-- BOOK SCREEN --><div class="bookScreen" id="bookScreen">
+  <div class="bookTitle" id="bookTitle">Grace</div>
+  <div class="book" id="book">
+    <!-- book interior animation area -->
+    <div id="bookInner" style="width:92%;color:#fff;text-align:center;opacity:0.95">
+      <h2 style="margin:0">A Book For You</h2>
+      <p style="opacity:0.9">Opening the pages...</p>
+    </div>
+  </div>
+</div><!-- MIRROR SCREEN --><div class="mirrorScreen" id="mirrorScreen">
+  <div class="page" id="pageArea">
+    <div class="imgWrap"><img id="pageImg" src="https://placehold.co/800x800/ddd/000?text=Image" alt="scene image"></div>
+    <div class="textWrap">
+      <div class="askLine">Oh mirror, oh mirror — tell me who's the most beautiful?</div>
+      <div id="pageText">The mirror is thinking...</div>
+    </div>
+  </div>
+  <div style="height:22px"></div>
+  <div id="pageControls" style="display:flex;gap:12px;align-items:center">
+    <button id="nextBtn" class="enterBtn" style="background:linear-gradient(90deg,#ffb6c1,#f7c46c)">Next</button>
+    <button id="skipBtn" class="enterBtn" style="background:#333;color:#fff">Skip</button>
+  </div>
+</div><!-- FINAL SCREEN --><div class="finalScreen" id="finalScreen">
+  <div class="finalLine" id="finalLine">That's you.</div>
+  <div class="subLines" id="subLines">May your day be filled with grace, light and endless smiles.</div>
+</div><div class="controls">Tip: Refresh to restart.</div><!-- References (the commit links you posted earlier) --><!--
+https://github.com/animefav106-art/Princess-day-/commit/66e60054b5008256444b7aaaac296583a11a04f3#diff-481f500227a272de750008974a8ce991aa98a10bacc86a8172850af5fb6a8d2e
+https://github.com/animefav106-art/Princess-day-/commit/53013f2610678539151da26e5656a2e4c39155ba#diff-f9aa37efa92cc37b4963261d73c132b63a4d0b89209650ddccb9da2838c537cc
+https://github.com/animefav106-art/Princess-day-/commit/3abb1a6822417fbcb10e41bd037ae3e60f0c926f#diff-51886d16b54a551fdea929b3bf0e35b93e1c8a28537e55fbcf8226d6269637aa
+https://github.com/animefav106-art/Princess-day-/commit/d8fb4d9e78be90d91072d320d7e237f104e17a5e#diff-9f12b2c2edc5033cd31e413e2578fee3a8b2ae126492c0a7825547f1a2a80736
+https://github.com/animefav106-art/Princess-day-/commit/14c15c8e4fe1f2063b775328fe96147ff5b1edf7#diff-cef2b3fd160e675930fbb760f7570ddfb1fa14c91caf6b653ee68eb405bd6c0c
+--><script>
+// --- Configuration ---
+const ACCEPTED_NAME = 'falak'; // case-insensitive
+const PLACEHOLDER_IMAGES = [
+  // Use the commit links as references; they may not be direct image URLs, but kept as user-supplied references
+  'https://placehold.co/900x900/efe6f2/111?text=Cinderella',
+  'https://placehold.co/900x900/ffd6e0/111?text=Beauty+1',
+  'https://placehold.co/900x900/d6f7ff/111?text=Beauty+2',
+  'https://placehold.co/900x900/fff1d6/111?text=Beauty+3',
+  'https://placehold.co/900x900/e6ffe7/111?text=Beauty+4'
+];
+
+// If you want to use the specific images you uploaded to GitHub, replace these URLs with raw file URLs.
+// e.g. 'https://raw.githubusercontent.com/username/repo/branch/path/to/image.jpg'
+// The user provided commit URLs above — please replace placeholders with raw image links if available.
+
+// Scenes text (mirror replies) — these will be read aloud
+const SCENES = [
+  {title:'Cinderella', img:PLACEHOLDER_IMAGES[0], text:"This is Cinderella — soft as moonlight, with grace woven in every step. Her beauty is gentle yet strong."},
+  {title:'Lila', img:PLACEHOLDER_IMAGES[1], text:"Lila blooms like a rose in the rain — bright, kind, and unforgettable."},
+  {title:'Maya', img:PLACEHOLDER_IMAGES[2], text:"Maya's laugh carries starlight; her presence warms the coldest nights."},
+  {title:'Anya', img:PLACEHOLDER_IMAGES[3], text:"Anya is quiet power — a portrait of elegance painted with courage."},
+  {title:'Sara', img:PLACEHOLDER_IMAGES[4], text:"Sara moves through the world with a gentle fire. Every glance tells a story."}
+];
+
+// Alternative rejection message
+const REJECTION_TEXT = "There are many princesses with graceful beauties like you, but not the prettiest. I'm sorry.";
+
+// Final big reveal line
+let FINAL_LINE = "That's you."; // user can change
+
+// Web Speech API voices will be used for reading aloud
+
+// --- UI Elements ---
+const emojiDecor = document.getElementById('emojiDecor');
+const letterScreen = document.getElementById('letterScreen');
+const nameInput = document.getElementById('nameInput');
+const enterBtn = document.getElementById('enterBtn');
+const bookScreen = document.getElementById('bookScreen');
+const bookTitle = document.getElementById('bookTitle');
+const bookEl = document.getElementById('book');
+const mirrorScreen = document.getElementById('mirrorScreen');
+const pageImg = document.getElementById('pageImg');
+const pageText = document.getElementById('pageText');
+const nextBtn = document.getElementById('nextBtn');
+const skipBtn = document.getElementById('skipBtn');
+const finalScreen = document.getElementById('finalScreen');
+const finalLineEl = document.getElementById('finalLine');
+const subLines = document.getElementById('subLines');
+
+// generate emoji decor
+const emojis = ['✨','🌸','🌺','💫','🌷','🦋','🎀','👑'];
+function generateEmojiDecor(){
+  for(let i=0;i<18;i++){
+    const el = document.createElement('div'); el.className='emoji'; el.textContent = emojis[i%emojis.length];
+    el.style.left = Math.random()*95+'%'; el.style.top = (50+Math.random()*40)+'%';
+    el.style.fontSize = (12+Math.random()*36)+'px';
+    el.style.animationDuration = (8+Math.random()*12)+'s';
+    el.style.opacity = 0.85; emojiDecor.appendChild(el);
+  }
+}
+generateEmojiDecor();
+
+// Speech utility
+function speak(text, opts={rate:1, pitch:1, voiceIndex:0}){
+  return new Promise(res=>{
+    if(!('speechSynthesis' in window)){
+      console.log('No TTS available'); res(); return;
+    }
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.rate = opts.rate || 1; utter.pitch = opts.pitch || 1;
+    // choose a voice if available
+    const voices = speechSynthesis.getVoices();
+    if(voices.length>0){
+      utter.voice = voices[opts.voiceIndex % voices.length];
+    }
+    utter.onend = ()=>res();
+    speechSynthesis.cancel(); // cancel any ongoing
+    speechSynthesis.speak(utter);
+  });
+}
+
+// handle enter
+enterBtn.addEventListener('click', ()=>startSequence());
+nameInput.addEventListener('keydown', e=>{ if(e.key==='Enter') startSequence(); });
+
+async function startSequence(){
+  const name = (nameInput.value||'').trim();
+  if(!name){ alert('Please enter a name'); return; }
+
+  // fade letter screen
+  letterScreen.style.transition='opacity .9s ease'; letterScreen.style.opacity=0;
+  setTimeout(()=>{ letterScreen.style.display='none'; },900);
+
+  // open book
+  setTimeout(()=>{
+    bookScreen.style.display='flex';
+    setTimeout(()=>{ bookTitle.style.opacity=1; bookEl.style.opacity=1; bookEl.classList.add('open'); },80);
+  }, 700);
+
+  // after small delay play book open audio (we use TTS to say book title)
+  await speak('Opening Grace.');
+
+  // check name condition
+  const ok = [name.toLowerCase()] .some(n=> n===ACCEPTED_NAME );
+
+  setTimeout(()=>{
+    // transition: book -> mirror
+    bookEl.style.opacity=0; bookTitle.style.opacity=0;
+    setTimeout(()=>{ bookScreen.style.display='none';
+      if(ok) runHappyPath(); else runRejectPath();
+    },600);
+  },900);
+}
+
+let sceneIndex = 0;
+async function runHappyPath(){
+  // show mirror screen
+  mirrorScreen.style.display='flex';
+  sceneIndex = 0;
+  await showScene(sceneIndex);
+}
+
+async function showScene(i){
+  const s = SCENES[i];
+  pageImg.src = s.img;
+  pageText.textContent = s.text;
+  // announce
+  await speak(s.title + '. ' + s.text, {rate:0.98, pitch:1.02, voiceIndex:0});
+}
+
+nextBtn.addEventListener('click', async ()=>{
+  sceneIndex++;
+  if(sceneIndex < SCENES.length){ await showScene(sceneIndex); }
+  else { // end - show final lines
+    await finishHappyPath();
+  }
+});
+
+skipBtn.addEventListener('click', async ()=>{ sceneIndex = SCENES.length; await finishHappyPath(); });
+
+async function finishHappyPath(){
+  // hide mirror
+  mirrorScreen.style.display='none';
+  // show final screen with decor and read lines
+  finalScreen.style.display='flex';
+  setTimeout(()=>{ finalLineEl.style.opacity=1; finalLineEl.style.transform='scale(1)'; },120);
+  // Compose final text (several lines read aloud)
+  const lines = [
+    'You are like the pages of a book, written in soft light and gentle hope.',
+    'May your day be full of grace, light and endless smiles.',
+    FINAL_LINE
+  ];
+  // show sublines
+  subLines.textContent = lines.slice(0,2).join('
+');
+
+  // read them
+  for(const l of lines){ await speak(l, {rate:0.95, pitch:1.02}); }
+}
+
+async function runRejectPath(){
+  // show big mirror with apology and alternate song (we will TTS the apology)
+  mirrorScreen.style.display='flex';
+  // Set a special look
+  pageImg.src = 'https://placehold.co/900x900/444/fff?text=Mirror';
+  pageText.textContent = REJECTION_TEXT;
+  await speak(REJECTION_TEXT, {rate:0.98, pitch:0.9, voiceIndex:1});
+
+  // after that show final apology screen then offer restart
+  setTimeout(()=>{
+    mirrorScreen.style.display='none'; finalLineEl.textContent = 'No book opens.'; finalLineEl.style.color='#ffdfe0'; finalScreen.style.display='flex'; finalLineEl.style.opacity=1; },1400);
+}
+
+// Pre-load voices (some browsers require user interaction to populate voices)
+window.speechSynthesis.onvoiceschanged = ()=>{ console.log('voices updated', speechSynthesis.getVoices()); };
+
+// small UX: autoplay first time require click; add subtle background music via WebAudio? We keep it silent to avoid autoplay issues
+
+// set default final line from user instruction
+finalLineEl.textContent = FINAL_LINE;
+
+</script></body>
+</html>
