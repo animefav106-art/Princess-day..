@@ -27,13 +27,12 @@
   .princessImg{width:40%;border-radius:12px;margin-right:20px;}
   .descBox{flex:1;padding:20px;font-size:18px;line-height:1.5;background:linear-gradient(135deg,#ffb6c1,#f7c46c);border-radius:12px;position:relative;color:#000;overflow:hidden;}
 
-  /* Floating emojis container */
+  /* Floating emojis */
   .emoji-container{position:absolute;inset:0;pointer-events:none;overflow:hidden;}
-  .emoji{position:absolute;font-size:28px;animation:floatUp linear infinite;}
-
+  .emoji{position:absolute;font-size:28px;animation-name:floatUp;animation-timing-function:linear;animation-iteration-count:infinite;}
   @keyframes floatUp{
-    0%{transform:translateY(110%) rotate(0deg)}
-    100%{transform:translateY(-20%) rotate(360deg)}
+    0%{transform:translateY(110%) rotate(0deg);}
+    100%{transform:translateY(-20%) rotate(360deg);}
   }
 
   /* Final Screen */
@@ -58,9 +57,8 @@
 
 <!-- Princess Screen -->
 <div id="princessScreen" class="screen hidden">
-  <div class="princessScreen">
-    <img id="princessImg" class="princessImg">
-    <div class="descBox" id="princessDesc"></div>
+  <img id="princessImg" class="princessImg">
+  <div class="descBox" id="princessDesc">
     <div class="emoji-container" id="princessEmojiContainer"></div>
   </div>
 </div>
@@ -77,7 +75,7 @@
 <script>
 const ACCEPTED_NAME = 'falak';
 const LOVE_SONG = 'https://github.com/animefav106-art/Princess-day-/raw/refs/heads/main/REC_20251118_184757.m4a';
-const REJECT_COLOR = '#daa520'; // golden-brown
+const REJECT_COLOR = '#daa520';
 
 const PRINCESSES = [
   {name:'Elsa', img:'https://i.postimg.cc/zGTn3cRs/Screenshot-20251118-195702-display-0-png.png', desc:"Elsa shines with quiet strength and elegance."},
@@ -88,27 +86,25 @@ const PRINCESSES = [
   {name:'Snow White', img:'https://i.postimg.cc/7ZCqNFNt/Screenshot-20251118-194911-2.jpg', desc:"Snow White is gentle, pure, and courageous."}
 ];
 
-const letterScreen=document.getElementById('letterScreen');
-const mirrorScreen=document.getElementById('mirrorScreen');
-const princessScreen=document.getElementById('princessScreen');
-const finalScreen=document.getElementById('finalScreen');
-const nameInput=document.getElementById('nameInput');
-const enterBtn=document.getElementById('enterBtn');
-const princessImg=document.getElementById('princessImg');
-const princessDesc=document.getElementById('princessDesc');
-const princessEmojiContainer=document.getElementById('princessEmojiContainer');
-const finalLine=document.getElementById('finalLine');
-const finalEmojiContainer=document.getElementById('finalEmojiContainer');
-const happyAudio=document.getElementById('happyAudio');
-const rejectAudio=document.getElementById('rejectAudio');
+const letterScreen = document.getElementById('letterScreen');
+const mirrorScreen = document.getElementById('mirrorScreen');
+const princessScreen = document.getElementById('princessScreen');
+const finalScreen = document.getElementById('finalScreen');
+const nameInput = document.getElementById('nameInput');
+const enterBtn = document.getElementById('enterBtn');
+const princessImg = document.getElementById('princessImg');
+const princessDesc = document.getElementById('princessDesc');
+const princessEmojiContainer = document.getElementById('princessEmojiContainer');
+const finalLine = document.getElementById('finalLine');
+const finalEmojiContainer = document.getElementById('finalEmojiContainer');
+const happyAudio = document.getElementById('happyAudio');
+const rejectAudio = document.getElementById('rejectAudio');
 
-function speak(text,opts={rate:1,pitch:1.2}) {
+function speak(text, opts={rate:1,pitch:1.2}){
   return new Promise(res=>{
     if(!('speechSynthesis' in window)){res();return;}
     const u = new SpeechSynthesisUtterance(text);
     u.rate = opts.rate; u.pitch = opts.pitch;
-    const voices = speechSynthesis.getVoices();
-    if(voices.length>0) u.voice = voices[0];
     u.onend = res;
     speechSynthesis.cancel();
     speechSynthesis.speak(u);
@@ -117,9 +113,10 @@ function speak(text,opts={rate:1,pitch:1.2}) {
 
 function randomEmoji(){return ['🌸','🐱','🎀','✨','💫','🌟'][Math.floor(Math.random()*6)];}
 
-function createFloatingEmojis(container,count=15){
+function createFloatingEmojis(container,count=20){
+  container.innerHTML='';
   for(let i=0;i<count;i++){
-    const e=document.createElement('div'); 
+    const e=document.createElement('div');
     e.className='emoji';
     e.style.left=Math.random()*90+'%';
     e.style.top=(100+Math.random()*50)+'%';
@@ -134,7 +131,7 @@ enterBtn.addEventListener('click',()=>start());
 nameInput.addEventListener('keydown',e=>{if(e.key==='Enter') start();});
 
 async function start(){
-  const name=nameInput.value.trim().toLowerCase();
+  const name = nameInput.value.trim().toLowerCase();
   if(!name){alert('Enter a name'); return;}
 
   letterScreen.classList.add('hidden');
@@ -149,13 +146,13 @@ async function start(){
 }
 
 async function happyPath(){
-  happyAudio.src=LOVE_SONG; happyAudio.loop=true; happyAudio.play().catch(e=>{});
+  happyAudio.src = LOVE_SONG; happyAudio.loop=true; happyAudio.play().catch(e=>{});
   princessScreen.classList.remove('hidden');
-  createFloatingEmojis(princessEmojiContainer,20);
+  createFloatingEmojis(princessEmojiContainer,25);
 
   for(const p of PRINCESSES){
-    princessImg.src=p.img;
-    princessDesc.textContent=p.desc;
+    princessImg.src = p.img;
+    princessDesc.textContent = p.desc;
     await speak(`${p.name}. ${p.desc}`);
     await new Promise(r=>setTimeout(r,3000));
   }
@@ -168,9 +165,9 @@ async function happyPath(){
 }
 
 async function rejectPath(){
-  document.body.style.background=REJECT_COLOR;
+  document.body.style.background = REJECT_COLOR;
   finalScreen.classList.remove('hidden');
-  finalLine.textContent="Sorry, even you are beautiful, but not the prettiest.";
+  finalLine.textContent = "Sorry, even you are beautiful, but not the prettiest.";
   speak(finalLine.textContent);
 }
 </script>
