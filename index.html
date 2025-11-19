@@ -1,100 +1,62 @@
-  <!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Princess Day — Grace</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Princess Day</title>
 <style>
-  :root{--accent:#f4dcdc;--gold:#f7c46c}
-  *{box-sizing:border-box}
-  body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;background:#000;color:#fff;overflow:hidden}
-
-  /* Background + emoji decor */
-  .bg{position:fixed;inset:0;z-index:0;display:block;overflow:hidden}
-  .stars{position:absolute;inset:0;background:radial-gradient(ellipse at center, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0.00) 40%)}
-  .emoji-decor{position:absolute;inset:0;pointer-events:none}
-  .emoji{position:absolute;font-size:28px;opacity:0.9;transform:translateY(0);animation:floatUp linear infinite}
-  @keyframes floatUp{0%{transform:translateY(10vh) rotate(0)}100%{transform:translateY(-80vh) rotate(360deg)}}
-
+  body{margin:0;font-family:sans-serif;background:#000;color:#fff;overflow:hidden;}
+  .screen{position:fixed;inset:0;display:flex;justify-content:center;align-items:center;flex-direction:column;transition:opacity .8s;}
+  .hidden{display:none;}
   /* Letter screen */
-  .letterScreen{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:10;background:linear-gradient(180deg,#000,#060606)}
-  .letterBox{width:min(780px,92%);background:rgba(255,255,255,0.03);border-radius:16px;padding:28px;border:1px solid rgba(255,255,255,0.05);text-align:center}
-  .letterBox h1{margin:0 0 6px 0;font-size:30px}
-  .letterBox p{opacity:0.9}
-  .nameInput{margin-top:18px;padding:12px 14px;border-radius:10px;border:none;font-size:18px;width:60%;text-align:center;background:#111;color:#fff}
-  .enterBtn{margin-top:16px;padding:10px 18px;border-radius:12px;border:none;background:linear-gradient(90deg,#f7c46c,#ffb6c1);color:#061226;font-weight:700;cursor:pointer}
-  .smallNote{margin-top:12px;font-size:13px;opacity:0.8}
-
-  /* Book screen */
-  .bookScreen{position:fixed;inset:0;display:none;z-index:20;align-items:center;justify-content:center;flex-direction:column}
-  .bookTitle{font-size:44px;font-weight:800;color:var(--accent);opacity:0;transition:opacity .9s ease}
-  .book{width:min(1100px,92%);height:66vh;background:linear-gradient(180deg,#0b0b0b,#111111);border-radius:18px;margin-top:26px;display:flex;align-items:center;justify-content:center;transform-origin:center;opacity:0;transition:opacity .9s ease,transform .9s ease}
-  .book.open{transform:scale(1);}
-
-  /* Mirror screen */
-  .mirrorScreen{position:fixed;inset:0;display:none;z-index:30;align-items:center;justify-content:center;flex-direction:column;background:linear-gradient(180deg,#060609,#000)}
-  .mirrorImg{width:50%;max-width:400px;transition:all 1.2s ease; border-radius:16px; border:4px solid rgba(255,255,255,0.1)}
-  .princessContainer{margin-top:24px; display:flex; flex-direction:column; align-items:center; text-align:center; opacity:0; transition:opacity 1s ease}
-  .princessContainer img{width:300px; max-width:80%; border-radius:12px; border:4px solid rgba(255,255,255,0.05); margin-bottom:12px; opacity:0; transition:opacity 1s ease;}
-  .princessContainer h2{margin:4px 0;font-size:26px; color:#f4dcdc; opacity:0; transition:opacity 1s ease;}
-  .princessContainer p{max-width:600px;font-size:18px; line-height:1.6;color:#fff; opacity:0; transition:opacity 1s ease; margin:0 12px}
-
-  /* Final reveal */
-  .finalScreen{position:fixed;inset:0;display:none;z-index:50;align-items:center;justify-content:center;flex-direction:column;background:radial-gradient(circle at center, rgba(255,255,255,0.02), transparent 40%)}
-  .finalLine{font-size:56px;font-weight:900;padding:12px 24px;border-radius:12px;background:linear-gradient(90deg,#1b1b1b, rgba(255,255,255,0.02));color:#ffdfe0;box-shadow:0 18px 50px rgba(0,0,0,0.6);transform:scale(0.96);opacity:0;transition:opacity .9s,transform .9s}
-  .subLines{margin-top:18px;font-size:18px;opacity:0.95;text-align:center;max-width:760px; white-space: pre-line;}
-  .finalEmojis{display:flex; gap:12px; margin-top:20px; opacity:0; transition:opacity 1s ease;}
-  .finalEmojis img{width:48px; height:48px; animation:floatUp 6s linear infinite;}
-
-  .controls{position:fixed;left:12px;bottom:12px;z-index:80;font-size:13px;opacity:0.9}
-
-  @media(max-width:900px){
-    .princessContainer img{width:90%;}
-    .finalLine{font-size:34px;}
+  .letterBox{
+    position:relative;
+    width:300px;height:400px;
+    background:url('https://i.postimg.cc/Vkw3J2VF/Screenshot-20251118-194527-2.jpg') no-repeat center/cover;
+    border-radius:12px;
+    display:flex;flex-direction:column;align-items:center;
+    justify-content:flex-start;padding-top:20px;
   }
+  .letterBox input{padding:10px 12px;border-radius:8px;border:none;font-size:16px;width:80%;text-align:center;background:rgba(0,0,0,0.5);color:#fff;}
+  .letterBox button{padding:10px 16px;margin-top:12px;border:none;border-radius:10px;background:linear-gradient(90deg,#f7c46c,#ffb6c1);font-weight:700;cursor:pointer;color:#061226;}
+  
+  /* Princess screen */
+  .princessScreen{display:flex;justify-content:center;align-items:center;width:90%;max-width:1000px;height:70%;border-radius:16px;overflow:hidden;position:relative;}
+  .princessImg{width:40%;border-radius:12px;margin-right:20px;}
+  .descBox{flex:1;padding:20px;color:#fff;font-size:18px;line-height:1.5;background:linear-gradient(135deg,#ffb6c1,#f7c46c);border-radius:12px;position:relative;}
+  .emoji-decor{position:absolute;inset:0;pointer-events:none;}
+  .emoji{position:absolute;font-size:28px;animation:floatUp linear infinite;}
+  @keyframes floatUp{0%{transform:translateY(100%)}100%{transform:translateY(-100%) rotate(360deg)}}
+
+  /* Final Screen */
+  .finalScreen{text-align:center;}
+  .finalLine{font-size:40px;font-weight:800;margin-bottom:12px;}
+  .finalEmojis img{width:48px;height:48px;margin:0 6px;}
 </style>
 </head>
 <body>
 
-<!-- Background & emoji decor -->
-<div class="bg">
-  <div class="stars"></div>
-  <div class="emoji-decor" id="emojiDecor"></div>
-</div>
-
-<!-- LETTER SCREEN -->
-<div class="letterScreen" id="letterScreen">
+<!-- Letter Screen -->
+<div id="letterScreen" class="screen">
   <div class="letterBox">
-    <h1>Princess Day</h1>
-    <p>Enter her name below.</p>
-    <input id="nameInput" class="nameInput" placeholder="Enter name" value="" />
-    <div><button id="enterBtn" class="enterBtn">Open Letter</button></div>
-    <div class="smallNote">Background & decor are created automatically. Use exact name: Falak (any case).</div>
+    <input id="nameInput" placeholder="Enter name">
+    <button id="enterBtn">Open Letter</button>
   </div>
 </div>
 
-<!-- BOOK SCREEN -->
-<div class="bookScreen" id="bookScreen">
-  <div class="bookTitle" id="bookTitle">Grace</div>
-  <div class="book open" id="book">
-    <img src="https://i.postimg.cc/Vkw3J2VF/Screenshot-20251118-194527-2.jpg" alt="letter" style="width:150px;border-radius:12px;">
+<!-- Princess Screen -->
+<div id="princessScreen" class="screen hidden">
+  <div class="princessScreen" id="princessContainer">
+    <img id="princessImg" class="princessImg">
+    <div class="descBox" id="princessDesc">
+      <div class="emoji-decor" id="emojiDecor"></div>
+    </div>
   </div>
 </div>
 
-<!-- MIRROR SCREEN -->
-<div class="mirrorScreen" id="mirrorScreen">
-  <img id="mirrorImg" class="mirrorImg" src="https://i.postimg.cc/tg5vnTx0/Screenshot-20251118-200225-display-0-png.png" alt="mirror">
-  <div id="princessContainer" class="princessContainer">
-    <img id="princessImg" src="">
-    <h2 id="princessName"></h2>
-    <p id="princessDesc"></p>
-  </div>
-</div>
-
-<!-- FINAL SCREEN -->
-<div class="finalScreen" id="finalScreen">
-  <div class="finalLine" id="finalLine">That's you.</div>
-  <div class="subLines" id="subLines"></div>
+<!-- Final Screen -->
+<div id="finalScreen" class="screen hidden">
+  <div class="finalLine" id="finalLine"></div>
   <div class="finalEmojis" id="finalEmojis">
     <img src="https://i.postimg.cc/KvxbdKDJ/Screenshot-20251118-200551-display-0-png.png">
     <img src="https://i.postimg.cc/0rRsQQTS/Screenshot-20251118-200715-display-0-png.png">
@@ -102,106 +64,84 @@
   </div>
 </div>
 
-<div class="controls">Tip: Refresh to restart.</div>
-
-<audio id="bgAudio" preload="none"></audio>
-<audio id="rejectAudio" preload="none"></audio>
+<audio id="bgAudio" preload="auto"></audio>
+<audio id="rejectAudio" preload="auto"></audio>
 
 <script>
-// --- Configuration ---
 const ACCEPTED_NAME = 'falak';
 const MUSIC_HAPPY = 'https://github.com/animefav106-art/Princess-day-/raw/refs/heads/main/REC_20251118_184757.m4a';
 const MUSIC_REJECT = 'https://github.com/animefav106-art/Princess-day-/raw/refs/heads/main/REC_20251118_184757.m4a';
 
 const PRINCESSES = [
-  {name:'Elsa', img:'https://i.postimg.cc/zGTn3cRs/Screenshot-20251118-195702-display-0-png.png', desc:"Elsa shines with quiet strength and elegance; her presence is as serene as snow, and her courage warms even the coldest hearts."},
-  {name:'Belle', img:'https://i.postimg.cc/FHxVD6Hv/Screenshot-20251118-195556-display-0-png.png', desc:"Belle is wise and kind, with a heart that sees the beauty in everyone. Her curiosity and grace make her unforgettable."},
-  {name:'Rapunzel', img:'https://i.postimg.cc/sD4Wrhdz/Screenshot-20251118-195459-display-0-png.png', desc:"Rapunzel radiates joy and curiosity. Her playful spirit and boundless energy brighten every room she enters."},
-  {name:'Aurora', img:'https://i.postimg.cc/VsjrqCNW/Screenshot-20251118-195315-2.jpg', desc:"Aurora is the embodiment of grace and charm. Her gentle heart and serene beauty bring warmth and light wherever she goes."},
-  {name:'Cinderella', img:'https://i.postimg.cc/JnC70pZ9/Screenshot-20251118-195121-2.jpg', desc:"Cinderella’s kindness and patience shine brighter than any crown. Her gentle heart and grace inspire everyone around her."},
-  {name:'Snow White', img:'https://i.postimg.cc/7ZCqNFNt/Screenshot-20251118-194911-2.jpg', desc:"Snow White is gentle and kind, with a heart full of innocence and courage. Her purity and charm captivate everyone she meets."}
+  {name:'Elsa', img:'https://i.postimg.cc/zGTn3cRs/Screenshot-20251118-195702-display-0-png.png', desc:"Elsa shines with quiet strength and elegance."},
+  {name:'Belle', img:'https://i.postimg.cc/FHxVD6Hv/Screenshot-20251118-195556-display-0-png.png', desc:"Belle is wise and kind, her heart sees beauty in everyone."},
+  {name:'Rapunzel', img:'https://i.postimg.cc/sD4Wrhdz/Screenshot-20251118-195459-display-0-png.png', desc:"Rapunzel radiates joy and curiosity."},
+  {name:'Aurora', img:'https://i.postimg.cc/VsjrqCNW/Screenshot-20251118-195315-2.jpg', desc:"Aurora is gentle, graceful, and charming."},
+  {name:'Cinderella', img:'https://i.postimg.cc/JnC70pZ9/Screenshot-20251118-195121-2.jpg', desc:"Cinderella’s kindness and patience shine bright."},
+  {name:'Snow White', img:'https://i.postimg.cc/7ZCqNFNt/Screenshot-20251118-194911-2.jpg', desc:"Snow White is gentle, pure, and courageous."}
 ];
 
-const MIRROR1 = 'https://i.postimg.cc/tg5vnTx0/Screenshot-20251118-200225-display-0-png.png';
-const MIRROR2 = 'https://i.postimg.cc/d04ntxbn/Screenshot-20251118-200457-display-0-png.png';
+const letterScreen=document.getElementById('letterScreen');
+const nameInput=document.getElementById('nameInput');
+const enterBtn=document.getElementById('enterBtn');
+const princessScreen=document.getElementById('princessScreen');
+const princessImg=document.getElementById('princessImg');
+const princessDesc=document.getElementById('princessDesc');
+const finalScreen=document.getElementById('finalScreen');
+const finalLine=document.getElementById('finalLine');
+const finalEmojis=document.getElementById('finalEmojis');
+const emojiDecor=document.getElementById('emojiDecor');
+const bgAudio=document.getElementById('bgAudio');
+const rejectAudio=document.getElementById('rejectAudio');
 
-// UI Elements
-const letterScreen=document.getElementById('letterScreen'),
-nameInput=document.getElementById('nameInput'),
-enterBtn=document.getElementById('enterBtn'),
-bookScreen=document.getElementById('bookScreen'),
-bookTitle=document.getElementById('bookTitle'),
-mirrorScreen=document.getElementById('mirrorScreen'),
-mirrorImg=document.getElementById('mirrorImg'),
-princessContainer=document.getElementById('princessContainer'),
-princessImg=document.getElementById('princessImg'),
-princessName=document.getElementById('princessName'),
-princessDesc=document.getElementById('princessDesc'),
-finalScreen=document.getElementById('finalScreen'),
-finalLine=document.getElementById('finalLine'),
-subLines=document.getElementById('subLines'),
-finalEmojis=document.getElementById('finalEmojis'),
-bgAudio=document.getElementById('bgAudio'),
-rejectAudio=document.getElementById('rejectAudio');
-
-// TTS
-function speak(text, opts={rate:1,pitch:1,voiceIndex:0}){
+function speak(text,opts={rate:1,pitch:1.2,voiceIndex:0}){
   return new Promise(res=>{
-    if(!('speechSynthesis' in window)){ res(); return; }
-    const utter=new SpeechSynthesisUtterance(text);
-    utter.rate=opts.rate||1; utter.pitch=opts.pitch||1;
+    if(!('speechSynthesis' in window)){res();return;}
+    const u=new SpeechSynthesisUtterance(text);
+    u.rate=opts.rate; u.pitch=opts.pitch;
     const voices=speechSynthesis.getVoices();
-    if(voices.length>0){utter.voice=voices[opts.voiceIndex%voices.length];}
-    utter.onend=()=>res();
-    speechSynthesis.cancel(); speechSynthesis.speak(utter);
+    if(voices.length>0) u.voice=voices[opts.voiceIndex%voices.length];
+    u.onend=res;
+    speechSynthesis.cancel();
+    speechSynthesis.speak(u);
   });
 }
 
-function normalizeName(raw){return raw?raw.trim().replace(/\s+/g,' ').toLowerCase():'';}
+function randomEmoji(){return ['🌸','🐱','🎀','✨','💫','🌟'][Math.floor(Math.random()*6)];}
+function createEmojis(){for(let i=0;i<8;i++){const e=document.createElement('div');e.className='emoji';e.style.left=Math.random()*80+'%';e.style.top=Math.random()*80+'%';e.textContent=randomEmoji();emojiDecor.appendChild(e);}}
 
-enterBtn.addEventListener('click',()=>startSequence());
-nameInput.addEventListener('keydown',e=>{if(e.key==='Enter') startSequence();});
+enterBtn.addEventListener('click',()=>start());
+nameInput.addEventListener('keydown',e=>{if(e.key==='Enter') start();});
 
-async function startSequence(){
-  const name=normalizeName(nameInput.value);
-  if(!name){alert('Please enter a name'); return;}
-  letterScreen.style.transition='opacity .9s ease'; letterScreen.style.opacity=0;
-  setTimeout(()=>{letterScreen.style.display='none';},900);
-  setTimeout(()=>{bookScreen.style.display='flex'; bookTitle.style.opacity=1;},700);
-  await speak('Opening Grace.', {rate:1,pitch:1.1});
-  const ok=(name===ACCEPTED_NAME);
-  setTimeout(()=>{bookScreen.style.display='none'; if(ok) runHappyPath(); else runRejectPath();},1000);
+async function start(){
+  const name=nameInput.value.trim().toLowerCase();
+  if(!name){alert('Enter a name'); return;}
+  letterScreen.classList.add('hidden');
+  if(name===ACCEPTED_NAME) await happyPath();
+  else await rejectPath();
 }
 
-async function runHappyPath(){
-  bgAudio.src=MUSIC_HAPPY; bgAudio.loop=true; await bgAudio.play().catch(()=>{});
-  mirrorScreen.style.display='flex'; mirrorImg.src=MIRROR1; mirrorImg.style.transform='scale(0.8)'; princessContainer.style.opacity=0;
-  setTimeout(()=>{mirrorImg.src=MIRROR2; mirrorImg.style.transform='scale(1.2)';},1200);
-
+async function happyPath(){
+  bgAudio.src=MUSIC_HAPPY; bgAudio.loop=true; bgAudio.play().catch(e=>{});
+  princessScreen.classList.remove('hidden');
+  createEmojis();
   for(const p of PRINCESSES){
-    await new Promise(async resolve=>{
-      princessImg.style.opacity=0; princessName.style.opacity=0; princessDesc.style.opacity=0;
-      setTimeout(()=>{princessImg.src=p.img; princessName.textContent=p.name; princessDesc.textContent=p.desc;
-        princessContainer.style.opacity=1;
-        setTimeout(()=>{princessImg.style.opacity=1; princessName.style.opacity=1; princessDesc.style.opacity=1;},200);
-      },500);
-      await speak(`${p.name}. ${p.desc}`, {rate:0.95,pitch:1.05});
-      resolve();
-    });
+    princessImg.src=p.img;
+    princessDesc.textContent=p.desc;
+    await speak(`${p.name}. ${p.desc}`);
+    await new Promise(r=>setTimeout(r,3000));
   }
-
-  mirrorScreen.style.display='none'; finalScreen.style.display='flex';
-  finalLine.textContent="But all these beauties are embodied in one…\nIt's you"; finalLine.style.opacity=1;
-  subLines.textContent="May your day be filled with grace, light and endless smiles."; 
-  finalEmojis.style.opacity=1;
-  speak("But all these beauties are embodied in one. It's you.", {rate:0.95,pitch:1.05});
+  princessScreen.classList.add('hidden');
+  finalScreen.classList.remove('hidden');
+  finalLine.textContent="But all these beauties are embodied in one… It's you!";
+  speak("But all these beauties are embodied in one. It's you!");
 }
 
-async function runRejectPath(){
-  rejectAudio.src=MUSIC_REJECT; rejectAudio.loop=true; await rejectAudio.play().catch(()=>{});
-  mirrorScreen.style.display='flex'; mirrorImg.src=MIRROR1; princessContainer.style.opacity=0;
-  await speak("Sorry Princess, even you are beautiful, but not the prettiest.", {rate:0.95,pitch:0.9});
-  setTimeout(()=>{mirrorScreen.style.display='none'; finalScreen.style.display='flex'; finalLine.textContent="No book opens."; finalLine.style.opacity=1;},1600);
+async function rejectPath(){
+  rejectAudio.src=MUSIC_REJECT; rejectAudio.loop=true; rejectAudio.play().catch(e=>{});
+  finalScreen.classList.remove('hidden');
+  finalLine.textContent="Sorry, even you are beautiful, but not the prettiest.";
+  speak("Sorry, even you are beautiful, but not the prettiest.");
 }
 </script>
 </body>
