@@ -70,6 +70,7 @@ body {
   border-radius:16px;
   overflow:hidden;
   position:relative;
+  background:linear-gradient(135deg,#ffeff5,#ffe6e0);
 }
 .princessImg{
   width:40%;
@@ -93,6 +94,7 @@ body {
   position:absolute;
   inset:0;
   pointer-events:none;
+  overflow:hidden;
 }
 .emoji{
   position:absolute;
@@ -104,6 +106,7 @@ body {
 .finalScreen{
   text-align:center;
   position:relative;
+  background:linear-gradient(135deg,#ffeff5,#ffe6e0);
 }
 .finalLine{
   font-size:40px;
@@ -130,9 +133,8 @@ body {
 <!-- Princess Screen -->
 <div id="princessScreen" class="screen hidden">
   <img id="princessImg" class="princessImg">
-  <div class="descBox" id="princessDesc">
-    <div class="emoji-container" id="princessEmojiContainer"></div>
-  </div>
+  <div class="descBox" id="princessDesc"></div>
+  <div class="emoji-container" id="princessEmojiContainer"></div>
 </div>
 
 <!-- Final Screen -->
@@ -172,22 +174,27 @@ const finalEmojiContainer = document.getElementById('finalEmojiContainer');
 const happyAudio = document.getElementById('happyAudio');
 const rejectAudio = document.getElementById('rejectAudio');
 
+// Speech function
 function speak(text, opts={rate:1,pitch:1.2}){
   return new Promise(res=>{
-    if(!('speechSynthesis' in window)){res();return;}
+    if(!('speechSynthesis' in window)){res(); return;}
     const u = new SpeechSynthesisUtterance(text);
-    u.rate = opts.rate; u.pitch = opts.pitch;
+    u.rate = opts.rate;
+    u.pitch = opts.pitch;
     u.onend = res;
     speechSynthesis.cancel();
     speechSynthesis.speak(u);
   });
 }
 
-function randomEmoji(){return ['🌸','🐱','🎀','✨','💫','🌟','💖','🌹','🦋','🍃'][Math.floor(Math.random()*10)];}
+// Random emoji
+function randomEmoji(){
+  return ['🌸','🐱','🎀','✨','💫','🌟','💖','🌹','🦋','🍃'][Math.floor(Math.random()*10)];
+}
 
-// Create continuous floating emojis
-function createFloatingEmojis(container, count=30){
-  container.innerHTML = '';
+// Continuous floating emojis
+function createFloatingEmojis(container, count=40){
+  container.innerHTML='';
   for(let i=0;i<count;i++){
     const e = document.createElement('div');
     e.className='emoji';
@@ -197,15 +204,14 @@ function createFloatingEmojis(container, count=30){
     e.style.fontSize = 20+Math.random()*20+'px';
     container.appendChild(e);
 
-    // Animate randomly
-    (function animateEmoji(el){
-      const dx = (Math.random()-0.5)*50;
-      const dy = (Math.random()-0.5)*50;
-      const duration = 3000 + Math.random()*3000;
-      const anim = el.animate([
+    (function animate(el){
+      const dx = (Math.random()-0.5)*200;
+      const dy = (Math.random()-0.5)*200;
+      const dur = 3000 + Math.random()*3000;
+      el.animate([
         {transform:'translate(0,0)'},
         {transform:`translate(${dx}px, ${dy}px)`}
-      ], {duration:duration, iterations:Infinity, direction:'alternate', easing:'ease-in-out'});
+      ], {duration:dur, iterations:Infinity, direction:'alternate', easing:'ease-in-out'});
     })(e);
   }
 }
@@ -231,19 +237,18 @@ async function start(){
 async function happyPath(){
   happyAudio.src = LOVE_SONG; happyAudio.loop=true; happyAudio.play().catch(e=>{});
   princessScreen.classList.remove('hidden');
-  createFloatingEmojis(princessEmojiContainer,30);
+  createFloatingEmojis(princessEmojiContainer,40);
 
   for(const p of PRINCESSES){
     princessImg.src = p.img;
     princessDesc.textContent = p.desc;
-    await speak(`${p.name}. ${p.desc}`);
-    // Immediately switch after speech ends
+    await speak(`${p.name}. ${p.desc}`); // immediately moves to next after speech
   }
 
   princessScreen.classList.add('hidden');
   finalScreen.classList.remove('hidden');
   finalLine.textContent="But all these beauties are embodied in one… It's you!";
-  createFloatingEmojis(finalEmojiContainer,40);
+  createFloatingEmojis(finalEmojiContainer,50);
   speak(finalLine.textContent);
 }
 
@@ -251,6 +256,7 @@ async function rejectPath(){
   document.body.style.background = REJECT_COLOR;
   finalScreen.classList.remove('hidden');
   finalLine.textContent = "Sorry, even you are beautiful, but not the prettiest.";
+  createFloatingEmojis(finalEmojiContainer,50);
   speak(finalLine.textContent);
 }
 </script>
