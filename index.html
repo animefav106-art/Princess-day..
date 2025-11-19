@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Princess Day</title>
+<style>
+  body{margin:0;font-family:sans-serif;overflow:hidden;background:#000;color:#fff;}
+  .screen{position:fixed;inset:0;display:flex;justify-content:center;align-items:center;flex-direction:column;transition:opacity .8s;}
+  .hidden{display:none;}
+
+  /* Letter Screen */
+  .letterBox{
+    width:320px;height:420px;
+    background:url('https://i.postimg.cc/Vkw3J2VF/Screenshot-20251118-194527-2.jpg') no-repeat center/cover;
+    border-radius:12px;
+    display:flex;flex-direction:column;align-items:center;padding-top:20px;
+  }
+  .letterBox input{padding:10px 12px;width:80%;border-radius:8px;border:none;text-align:center;background:rgba(0,0,0,0.5);color:#fff;margin-bottom:12px;}
+  .letterBox button{padding:10px 16px;border-radius:10px;border:none;background:linear-gradient(90deg,#f7c46c,#ffb6c1);font-weight:700;color:#061226;cursor:pointer;}
+
+  /* Mirror Screen */
+  .mirrorScreen img{width:300px;border-radius:12px;}
+
+  /* Princess Screen */
+  .princessScreen{display:flex;align-items:center;justify-content:center;width:90%;max-width:1000px;height:70%;border-radius:16px;overflow:hidden;position:relative;}
+  .princessImg{width:40%;border-radius:12px;margin-right:20px;}
+  .descBox{flex:1;padding:20px;font-size:18px;line-height:1.5;background:linear-gradient(135deg,#ffb6c1,#f7c46c);border-radius:12px;position:relative;color:#000;overflow:hidden;}
+
+  /* Floating emojis container */
+  .emoji-container{position:absolute;inset:0;pointer-events:none;overflow:hidden;}
+  .emoji{position:absolute;font-size:28px;animation:floatUp linear infinite;}
+
+  @keyframes floatUp{
+    0%{transform:translateY(110%) rotate(0deg)}
+    100%{transform:translateY(-20%) rotate(360deg)}
+  }
+
+  /* Final Screen */
+  .finalScreen{text-align:center;position:relative;}
+  .finalLine{font-size:40px;font-weight:800;margin-bottom:12px;}
+</style>
+</head>
+<body>
+
+<!-- Letter Screen -->
+<div id="letterScreen" class="screen">
+  <div class="letterBox">
+    <input id="nameInput" placeholder="Enter name">
+    <button id="enterBtn">Open Letter</button>
+  </div>
+</div>
+
+<!-- Mirror Screen -->
+<div id="mirrorScreen" class="screen hidden">
+  <img src="https://i.postimg.cc/tg5vnTx0/Screenshot-20251118-200225-display-0-png.png" alt="mirror">
+</div>
+
+<!-- Princess Screen -->
+<div id="princessScreen" class="screen hidden">
+  <div class="princessScreen">
+    <img id="princessImg" class="princessImg">
+    <div class="descBox" id="princessDesc"></div>
+    <div class="emoji-container" id="princessEmojiContainer"></div>
+  </div>
+</div>
+
+<!-- Final Screen -->
+<div id="finalScreen" class="screen hidden">
+  <div class="finalLine" id="finalLine"></div>
+  <div class="emoji-container" id="finalEmojiContainer"></div>
+</div>
+
+<audio id="happyAudio" preload="auto"></audio>
+<audio id="rejectAudio" preload="auto"></audio>
+
+<script>
+const ACCEPTED_NAME = 'falak';
+const LOVE_SONG = 'https://github.com/animefav106-art/Princess-day-/raw/refs/heads/main/REC_20251118_184757.m4a';
+const REJECT_COLOR = '#daa520'; // golden-brown
+
+const PRINCESSES = [
+  {name:'Elsa', img:'https://i.postimg.cc/zGTn3cRs/Screenshot-20251118-195702-display-0-png.png', desc:"Elsa shines with quiet strength and elegance."},
+  {name:'Belle', img:'https://i.postimg.cc/FHxVD6Hv/Screenshot-20251118-195556-display-0-png.png', desc:"Belle is wise and kind, her heart sees beauty in everyone."},
+  {name:'Rapunzel', img:'https://i.postimg.cc/sD4Wrhdz/Screenshot-20251118-195459-display-0-png.png', desc:"Rapunzel radiates joy and curiosity."},
+  {name:'Aurora', img:'https://i.postimg.cc/VsjrqCNW/Screenshot-20251118-195315-2.jpg', desc:"Aurora is gentle, graceful, and charming."},
+  {name:'Cinderella', img:'https://i.postimg.cc/JnC70pZ9/Screenshot-20251118-195121-2.jpg', desc:"Cinderella’s kindness and patience shine bright."},
+  {name:'Snow White', img:'https://i.postimg.cc/7ZCqNFNt/Screenshot-20251118-194911-2.jpg', desc:"Snow White is gentle, pure, and courageous."}
+];
+
+const letterScreen=document.getElementById('letterScreen');
+const mirrorScreen=document.getElementById('mirrorScreen');
+const princessScreen=document.getElementById('princessScreen');
+const finalScreen=document.getElementById('finalScreen');
+const nameInput=document.getElementById('nameInput');
+const enterBtn=document.getElementById('enterBtn');
+const princessImg=document.getElementById('princessImg');
+const princessDesc=document.getElementById('princessDesc');
+const princessEmojiContainer=document.getElementById('princessEmojiContainer');
+const finalLine=document.getElementById('finalLine');
+const finalEmojiContainer=document.getElementById('finalEmojiContainer');
+const happyAudio=document.getElementById('happyAudio');
+const rejectAudio=document.getElementById('rejectAudio');
+
+function speak(text,opts={rate:1,pitch:1.2}) {
+  return new Promise(res=>{
+    if(!('speechSynthesis' in window)){res();return;}
+    const u = new SpeechSynthesisUtterance(text);
+    u.rate = opts.rate; u.pitch = opts.pitch;
+    const voices = speechSynthesis.getVoices();
+    if(voices.length>0) u.voice = voices[0];
+    u.onend = res;
+    speechSynthesis.cancel();
+    speechSynthesis.speak(u);
+  });
+}
+
+function randomEmoji(){return ['🌸','🐱','🎀','✨','💫','🌟'][Math.floor(Math.random()*6)];}
+
+function createFloatingEmojis(container,count=15){
+  for(let i=0;i<count;i++){
+    const e=document.createElement('div'); 
+    e.className='emoji';
+    e.style.left=Math.random()*90+'%';
+    e.style.top=(100+Math.random()*50)+'%';
+    e.style.fontSize=(20+Math.random()*20)+'px';
+    e.style.animationDuration=(4+Math.random()*3)+'s';
+    e.textContent=randomEmoji();
+    container.appendChild(e);
+  }
+}
+
+enterBtn.addEventListener('click',()=>start());
+nameInput.addEventListener('keydown',e=>{if(e.key==='Enter') start();});
+
+async function start(){
+  const name=nameInput.value.trim().toLowerCase();
+  if(!name){alert('Enter a name'); return;}
+
+  letterScreen.classList.add('hidden');
+
+  // Show mirror first
+  mirrorScreen.classList.remove('hidden');
+  await new Promise(r=>setTimeout(r,2000));
+  mirrorScreen.classList.add('hidden');
+
+  if(name===ACCEPTED_NAME) await happyPath();
+  else await rejectPath();
+}
+
+async function happyPath(){
+  happyAudio.src=LOVE_SONG; happyAudio.loop=true; happyAudio.play().catch(e=>{});
+  princessScreen.classList.remove('hidden');
+  createFloatingEmojis(princessEmojiContainer,20);
+
+  for(const p of PRINCESSES){
+    princessImg.src=p.img;
+    princessDesc.textContent=p.desc;
+    await speak(`${p.name}. ${p.desc}`);
+    await new Promise(r=>setTimeout(r,3000));
+  }
+
+  princessScreen.classList.add('hidden');
+  finalScreen.classList.remove('hidden');
+  finalLine.textContent="But all these beauties are embodied in one… It's you!";
+  createFloatingEmojis(finalEmojiContainer,30);
+  speak(finalLine.textContent);
+}
+
+async function rejectPath(){
+  document.body.style.background=REJECT_COLOR;
+  finalScreen.classList.remove('hidden');
+  finalLine.textContent="Sorry, even you are beautiful, but not the prettiest.";
+  speak(finalLine.textContent);
+}
+</script>
+</body>
+</html>
