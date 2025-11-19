@@ -5,39 +5,35 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Princess Day</title>
 <style>
-  body{margin:0;font-family:sans-serif;overflow:hidden;background:#000;color:#fff;}
-  .screen{position:fixed;inset:0;display:flex;justify-content:center;align-items:center;flex-direction:column;transition:opacity .8s;}
-  .hidden{display:none;}
+body{margin:0;font-family:sans-serif;overflow:hidden;background:#000;color:#fff;}
+.screen{position:fixed;inset:0;display:flex;justify-content:center;align-items:center;flex-direction:column;transition:opacity .8s;}
+.hidden{display:none;}
 
-  /* Letter Screen */
-  .letterBox{
-    width:320px;height:420px;
-    background:url('https://i.postimg.cc/Vkw3J2VF/Screenshot-20251118-194527-2.jpg') no-repeat center/cover;
-    border-radius:12px;
-    display:flex;flex-direction:column;align-items:center;padding-top:20px;
-  }
-  .letterBox input{padding:10px 12px;width:80%;border-radius:8px;border:none;text-align:center;background:rgba(0,0,0,0.5);color:#fff;margin-bottom:12px;}
-  .letterBox button{padding:10px 16px;border-radius:10px;border:none;background:linear-gradient(90deg,#f7c46c,#ffb6c1);font-weight:700;color:#061226;cursor:pointer;}
+/* Letter Screen */
+.letterBox{
+  width:320px;height:420px;
+  background:url('https://i.postimg.cc/Vkw3J2VF/Screenshot-20251118-194527-2.jpg') no-repeat center/cover;
+  border-radius:12px;
+  display:flex;flex-direction:column;align-items:center;padding-top:20px;
+}
+.letterBox input{padding:10px 12px;width:80%;border-radius:8px;border:none;text-align:center;background:rgba(0,0,0,0.5);color:#fff;margin-bottom:12px;}
+.letterBox button{padding:10px 16px;border-radius:10px;border:none;background:linear-gradient(90deg,#f7c46c,#ffb6c1);font-weight:700;color:#061226;cursor:pointer;}
 
-  /* Mirror Screen */
-  .mirrorScreen img{width:300px;border-radius:12px;}
+/* Mirror Screen */
+.mirrorScreen img{width:300px;border-radius:12px;}
 
-  /* Princess Screen */
-  .princessScreen{display:flex;align-items:center;justify-content:center;width:90%;max-width:1000px;height:70%;border-radius:16px;overflow:hidden;position:relative;}
-  .princessImg{width:40%;border-radius:12px;margin-right:20px;}
-  .descBox{flex:1;padding:20px;font-size:18px;line-height:1.5;background:linear-gradient(135deg,#ffb6c1,#f7c46c);border-radius:12px;position:relative;color:#000;overflow:hidden;}
+/* Princess Screen */
+.princessScreen{display:flex;align-items:center;justify-content:center;width:90%;max-width:1000px;height:70%;border-radius:16px;overflow:hidden;position:relative;}
+.princessImg{width:40%;border-radius:12px;margin-right:20px;}
+.descBox{flex:1;padding:20px;font-size:18px;line-height:1.5;background:linear-gradient(135deg,#ffb6c1,#f7c46c);border-radius:12px;position:relative;color:#000;overflow:hidden;}
 
-  /* Floating emojis */
-  .emoji-container{position:absolute;inset:0;pointer-events:none;overflow:hidden;}
-  .emoji{position:absolute;font-size:28px;animation-name:floatUp;animation-timing-function:linear;animation-iteration-count:infinite;}
-  @keyframes floatUp{
-    0%{transform:translateY(110%) rotate(0deg);}
-    100%{transform:translateY(-20%) rotate(360deg);}
-  }
+/* Floating emojis */
+.emoji-container{position:absolute;inset:0;pointer-events:none;overflow:hidden;}
+.emoji{position:absolute;font-size:28px;will-change:transform;}
 
-  /* Final Screen */
-  .finalScreen{text-align:center;position:relative;}
-  .finalLine{font-size:40px;font-weight:800;margin-bottom:12px;}
+/* Final Screen */
+.finalScreen{text-align:center;position:relative;}
+.finalLine{font-size:40px;font-weight:800;margin-bottom:12px;}
 </style>
 </head>
 <body>
@@ -111,19 +107,30 @@ function speak(text, opts={rate:1,pitch:1.2}){
   });
 }
 
-function randomEmoji(){return ['🌸','🐱','🎀','✨','💫','🌟'][Math.floor(Math.random()*6)];}
+function randomEmoji(){return ['🌸','🐱','🎀','✨','💫','🌟','💖','🌹','🦋','🍃'][Math.floor(Math.random()*10)];}
 
-function createFloatingEmojis(container,count=20){
+// Floating emojis function
+function createFloatingEmojis(container,count=25){
   container.innerHTML='';
   for(let i=0;i<count;i++){
-    const e=document.createElement('div');
+    const e = document.createElement('div');
     e.className='emoji';
-    e.style.left=Math.random()*90+'%';
-    e.style.top=(100+Math.random()*50)+'%';
-    e.style.fontSize=(20+Math.random()*20)+'px';
-    e.style.animationDuration=(4+Math.random()*3)+'s';
-    e.textContent=randomEmoji();
+    e.style.left = Math.random()*90+'%';
+    e.style.top = Math.random()*90+'%';
+    e.style.fontSize = (20+Math.random()*20)+'px';
     container.appendChild(e);
+
+    // Animate randomly using JS
+    const animX = 20 + Math.random()*30;
+    const animY = 20 + Math.random()*30;
+    const speed = 3000 + Math.random()*4000;
+    (function animate(){
+      e.animate([
+        {transform:`translate(0,0) rotate(0deg)`},
+        {transform:`translate(${Math.random()*animX}px, -${Math.random()*animY}px) rotate(360deg)`},
+        {transform:`translate(-${Math.random()*animX}px, ${Math.random()*animY}px) rotate(720deg)`}
+      ],{duration:speed,iterations:Infinity});
+    })();
   }
 }
 
@@ -148,7 +155,7 @@ async function start(){
 async function happyPath(){
   happyAudio.src = LOVE_SONG; happyAudio.loop=true; happyAudio.play().catch(e=>{});
   princessScreen.classList.remove('hidden');
-  createFloatingEmojis(princessEmojiContainer,25);
+  createFloatingEmojis(princessEmojiContainer,30);
 
   for(const p of PRINCESSES){
     princessImg.src = p.img;
@@ -160,7 +167,7 @@ async function happyPath(){
   princessScreen.classList.add('hidden');
   finalScreen.classList.remove('hidden');
   finalLine.textContent="But all these beauties are embodied in one… It's you!";
-  createFloatingEmojis(finalEmojiContainer,30);
+  createFloatingEmojis(finalEmojiContainer,40);
   speak(finalLine.textContent);
 }
 
